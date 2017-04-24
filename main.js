@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 const math = require('mathjs');
 
-let theta1 = math.random([4, 3], 0, 1);
-let theta2 = math.random([1, 4], 0, 1);
+let hiddenNeurons = 3;
+let inputs = 3;
+let outputs = 1;
+let theta1 = math.random([hiddenNeurons + 1, inputs + 1], 0, 1);
+let theta2 = math.random([outputs, hiddenNeurons + 1], 0, 1);
 let trainingCount = 1000;
 
 const alpha = 10;
@@ -20,7 +23,7 @@ const matrixSigmoid = matrix => {
 };
 
 const forwardPropagate = (X, theta1, theta2) => {
-  let a1 = math.subset(X, math.index(math.range(0, 3), 0));
+  let a1 = math.subset(X, math.index(math.range(0, inputs + 1), 0));
   let a2 = matrixSigmoid(math.multiply(theta1, a1));
   let a3 = sigmoid(math.squeeze(math.multiply(theta2, a2)));
 
@@ -34,7 +37,8 @@ const forwardPropagate = (X, theta1, theta2) => {
 const costFunction = (theta1, theta2) => {
   let X = [
     [0, 1, 0, 1], 
-    [0, 0, 1, 1]
+    [0, 0, 1, 1],
+    [1, 1, 1, 1]
   ];
   let y = [
     [0],
@@ -44,8 +48,8 @@ const costFunction = (theta1, theta2) => {
   ];
   let m = math.size(X)[1];
   let n = math.size(X)[0];
-  let bigDelta1 = math.zeros(4, 3);
-  let bigDelta2 = math.zeros(1, 4);
+  let bigDelta1 = math.zeros(hiddenNeurons + 1, inputs + 1);
+  let bigDelta2 = math.zeros(outputs, hiddenNeurons + 1);
   let a3s = [
     [0],
     [0],
@@ -105,4 +109,4 @@ for (let i = 0; i < trainingCount; i++) {
   theta2 = math.subtract(theta2, math.multiply(alpha, D2)).toArray();
 }
 
-console.log(forwardPropagate([[1], [0], [0]], theta1, theta2).a3);
+console.log(forwardPropagate([[1], [0], [0], [1]], theta1, theta2).a3);
