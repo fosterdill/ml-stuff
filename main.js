@@ -2,7 +2,7 @@
 const math = require('mathjs');
 
 let hiddenNeurons = 3;
-let inputs = 3;
+let inputs = 4;
 let outputs = 1;
 let theta1 = math.random([hiddenNeurons + 1, inputs + 1], 0, 1);
 let theta2 = math.random([outputs, hiddenNeurons + 1], 0, 1);
@@ -36,15 +36,17 @@ const forwardPropagate = (X, theta1, theta2) => {
 
 const costFunction = (theta1, theta2) => {
   let X = [
-    [0, 1, 0, 1], 
-    [0, 0, 1, 1],
-    [1, 1, 1, 1]
+    [0, 0, 0, 1, 0], 
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 1, 0]
   ];
   let y = [
     [0],
+    [0],
+    [0],
     [1],
-    [1],
-    [0]
+    [1]
   ];
   let m = math.size(X)[1];
   let n = math.size(X)[0];
@@ -56,8 +58,8 @@ const costFunction = (theta1, theta2) => {
     [0],
     [0]
   ];
-  
-  X = [[1, 1, 1, 1]].concat(X);
+
+  X = math.ones(1, m).toArray().concat(X);
 
 
   for (let i = 0; i < m; i++) {
@@ -109,4 +111,4 @@ for (let i = 0; i < trainingCount; i++) {
   theta2 = math.subtract(theta2, math.multiply(alpha, D2)).toArray();
 }
 
-console.log(forwardPropagate([[1], [0], [0], [1]], theta1, theta2).a3);
+console.log(forwardPropagate([[1], [0], [0], [0], [0]], theta1, theta2).a3);
