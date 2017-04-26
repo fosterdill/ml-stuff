@@ -43,20 +43,23 @@ const costFunction = (X, y, theta1, theta2) => {
 
 
   for (let i = 0; i < m; i++) {
-    let {a1, a2, a3} = forwardPropagate(theta1, theta2, math.subset(X, math.index(math.range(0, n + 1), i)));
+    let {
+      a1, 
+      a2, a3
+    } = forwardPropagate(theta1, theta2, math.subset(X, math.index(math.range(0, n + 1), i)));
 
     a3s[i] = math.squeeze(a3);
     yi = math.subset(y, math.index(math.range(0, outputs), i))
     let d3 = math.subtract(a3, yi);
     let d2 = math.dotMultiply(
-               math.dotMultiply(
-                 math.multiply(
-                   math.transpose(theta2), 
-                   d3
-                 ), 
-                 a2
-               ), 
-               math.subtract(1, a2)
+      math.dotMultiply(
+        math.multiply(
+          math.transpose(theta2), 
+          d3
+        ), 
+        a2
+      ), 
+      math.subtract(1, a2)
     );
 
     bigDelta1 = math.add(bigDelta1, math.multiply(d2, math.transpose(a1)));
@@ -67,17 +70,17 @@ const costFunction = (X, y, theta1, theta2) => {
   let D2 = math.multiply(1/m, bigDelta2);
 
   let J = math.multiply(
-            -(1/m), 
-            math.add(
-              math.multiply(
-                y, 
-                math.log(a3s)
-              ), 
-              math.multiply(
-                math.subtract(1, y), 
-                math.log(math.subtract(1, a3s))
-              )
-            )
+    -(1/m), 
+    math.add(
+      math.multiply(
+        y, 
+        math.log(a3s)
+      ), 
+      math.multiply(
+        math.subtract(1, y), 
+        math.log(math.subtract(1, a3s))
+      )
+    )
   );
 
   return {
@@ -85,6 +88,17 @@ const costFunction = (X, y, theta1, theta2) => {
     D2,
     J
   };
+};
+
+const train = (X, y, alpha = 10) => {
+  for (let i = 0; i < trainingCount; i++) {
+    let {D1, D2, J} = costFunction(X, y, theta1, theta2);
+
+    theta1 = math.subtract(theta1, math.multiply(alpha, D1)).toArray();
+    theta2 = math.subtract(theta2, math.multiply(alpha, D2)).toArray();
+  }
+
+  return forwardPropagate.bind(null, theta1, theta2);
 };
 
 let X = [
@@ -97,16 +111,5 @@ let y = [
   [0, 0, 0, 0, 1],
   [0, 0, 0, 0, 0]
 ];
-
-const train = (X, y, alpha = 10) => {
-  for (let i = 0; i < trainingCount; i++) {
-    let {D1, D2, J} = costFunction(X, y, theta1, theta2);
-
-    theta1 = math.subtract(theta1, math.multiply(alpha, D1)).toArray();
-    theta2 = math.subtract(theta2, math.multiply(alpha, D2)).toArray();
-  }
-
-  return forwardPropagate.bind(null, theta1, theta2);
-};
 
 console.log(train(X, y)([[1], [0], [0], [1], [0]]).a3);
