@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <style>
+            body {
+                font-size: 0;
+            }
+            .box__item {
+                background: rebeccapurple;
+                width: 200px;
+                border: 1px solid black;
+                height: 200px;
+                vertical-align: top;
+                display: inline-block;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            .box__item:active {
+                background: purple;
+            }
+            .box {
+                margin: 0 auto;
+                width: 614px;
+                user-select: none;
+            }
+        </style>
+        <script src="./bundle.js"></script>
+        <script>
+            function something () {
+                var prediction = train(X, y, .1, 100)([[1], [last6[1]], [last6[2]], [last6[3]], [last6[4]], [last6[5]]]).a3;
+                var maxPrediction = Math.max.apply(null, prediction);
+                for (i = 0; i < 9; i++) {
+                    document.querySelector('[data-index="' + i +'"]').innerHTML = prediction[i][0].toFixed(2).slice(2) + '%';
+
+                    if (prediction[i][0] === maxPrediction) {
+                        document.querySelector('[data-index="' + i +'"]').style.background = 'green';
+                    }
+                }
+            }
+            document.addEventListener("DOMContentLoaded", function (event) {
+                last6 = [];
+                var hasEnough = false;
+                X = [
+                    [], 
+                    [],
+                    [], 
+                    [], 
+                    []
+                ];
+                y = [
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    []
+                ];
+
+                for (var i = 0; i < 9; i++) {
+                    document.querySelector('[data-index="' + i + '"]').addEventListener('click', function (event) {
+                        last6.push(Number(event.target.dataset.index));
+
+                        if (last6.length === 7) {
+                            last6 = last6.slice(1);
+                        }
+                        
+                        if (last6.length === 6) {
+                            hasEnough = true;
+
+                            X[0].push(last6[0]);
+                            X[1].push(last6[1]);
+                            X[2].push(last6[2]);
+                            X[3].push(last6[3]);
+                            X[4].push(last6[4]);
+
+                            for (var j = 0; j < 9; j++) {
+                                if (j === last6[5]) {
+                                    y[j].push(1);
+                                } else {
+                                    y[j].push(0);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <div class="box">
+            <div data-index="0" class="box__item"></div>
+            <div data-index="1" class="box__item"></div>
+            <div data-index="2" class="box__item"></div>
+            <div data-index="3" class="box__item"></div>
+            <div data-index="4" class="box__item"></div>
+            <div data-index="5" class="box__item"></div>
+            <div data-index="6" class="box__item"></div>
+            <div data-index="7" class="box__item"></div>
+            <div data-index="8" class="box__item"></div>
+        </div>
+        <button onclick="something()">test</button>
+    </body>
+</html>
