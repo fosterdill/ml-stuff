@@ -88,11 +88,11 @@ const costFunction = (theta1, theta2) => {
             math.add(
               math.multiply(
                 math.transpose(y), 
-                a3s.map(row => row.map(val => math.log(val)))
+                math.log(a3s)
               ), 
               math.multiply(
                 math.subtract(1, math.transpose(y)), 
-                math.subtract(1, a3s).map(row => row.map(val => math.log(val)))
+                math.log(math.subtract(1, a3s))
               )
             )
   );
@@ -111,4 +111,4 @@ for (let i = 0; i < trainingCount; i++) {
   theta2 = math.subtract(theta2, math.multiply(alpha, D2)).toArray();
 }
 
-console.log(forwardPropagate([[1], [0], [0], [0], [0]], theta1, theta2).a3);
+console.log(forwardPropagate([[1], [0], [0], [1], [0]], theta1, theta2).a3);
