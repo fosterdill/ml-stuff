@@ -26,7 +26,7 @@
         <script src="./bundle.js"></script>
         <script>
             function something () {
-                var prediction = train(X, y, .1, 100)([[1], [last6[1]], [last6[2]], [last6[3]], [last6[4]], [last6[5]]]).a3;
+                var prediction = train(X, y, 1, 100)([[1], [last6[1]], [last6[2]], [last6[3]], [last6[4]], [last6[5]]]).a3;
                 var maxPrediction = Math.max.apply(null, prediction);
                 for (i = 0; i < 9; i++) {
                     document.querySelector('[data-index="' + i +'"]').innerHTML = prediction[i][0].toFixed(2).slice(2) + '%';
