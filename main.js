@@ -1,22 +1,33 @@
-#!/usr/bin/env node
-const math = require('mathjs');
+#!/usr/bin/env node 
+let hidden = 15;
+let inputs = 2;
+let outputs = 3;
+var a2ones = Matrix.ones(1, 1);
+a2shapeones = Matrix.ones(hidden + 1, 1);
+
 const sigmoid = value => {
-  return (1 / (1 + math.exp(-value)));
+  return (1 / (1 + Math.exp(-value)));
 };
 
-const matrixSigmoid = matrix => {
-  return matrix.map(value => {
-    return value.map(value => {
-      return sigmoid(value);
-    });
-  });
+const addRowToTop = (m, r) => {
+  return Matrix.augment(r.T, m.T).T;
+};
+
+const getColumn = (m, j) => {
+  let result = Matrix.zeros(m.shape[0], 1);
+
+  for (var i = 0; i < m.shape[0]; i++) {
+    result.set(i, 0, m.get(i, j));
+  }
+
+  return result;
 };
 
 const forwardPropagate = (theta1, theta2, inputs, x) => {
   let a1 = x;
-  let a2 = matrixSigmoid(math.multiply(theta1, a1));
-  a2 = math.ones(1, math.size(a2)[1]).toArray().concat(a2);
-  let a3 = matrixSigmoid(math.multiply(theta2, a2));
+  let a2 = Matrix.multiply(theta1, a1).map(sigmoid);
+  a2 = addRowToTop(a2, a2ones);
+  let a3 = Matrix.multiply(theta2, a2).map(sigmoid);
 
   return {
     a1,
@@ -26,12 +37,12 @@ const forwardPropagate = (theta1, theta2, inputs, x) => {
 };
 
 const costFunction = (X, y, theta1, theta2, inputs, outputs, hidden) => {
-  let m = math.size(X)[1];
-  let n = math.size(X)[0];
-  let bigDelta1 = math.zeros(hidden + 1, inputs + 1);
-  let bigDelta2 = math.zeros(outputs, hidden + 1);
-  let a3s = [];
-  X = math.ones(1, m).toArray().concat(X);
+  let m = X.shape[1];
+  let n = X.shape[0];
+  let bigDelta1 = Matrix.zeros(hidden + 1, inputs + 1);
+  let bigDelta2 = Matrix.zeros(outputs, hidden + 1);
+  // let a3s = [];
+  X = addRowToTop(X, Matrix.ones(1, m));
 
   for (let i = 0; i < m; i++) {
     let {
@@ -42,29 +53,23 @@ const costFunction = (X, y, theta1, theta2, inputs, outputs, hidden) => {
       theta1, 
       theta2, 
       inputs,
-      math.subset(X, math.index(math.range(0, inputs + 1), i))
+      getColumn(X, i)
     );
 
-    a3s[i] = math.squeeze(a3);
-    yi = math.subset(y, math.index(math.range(0, outputs), i))
-    let d3 = math.subtract(a3, yi);
-    let d2 = math.dotMultiply(
-      math.dotMultiply(
-        math.multiply(
-          math.transpose(theta2), 
-          d3
-        ), 
-        a2
-      ), 
-      math.subtract(1, a2)
-    );
+    // a3s[i] = math.squeeze(a3);
+    yi = getColumn(y, i);
+    let d3 = Matrix.subtract(a3, yi);
+    let d2 = Matrix.multiply(theta2.T, d3)
+      .product(a2)
+      .product(
+        Matrix.subtract(a2shapeones, a2)
+      );
 
-    bigDelta1 = math.add(bigDelta1, math.multiply(d2, math.transpose(a1)));
-    bigDelta2 = math.add(bigDelta2, math.multiply(d3, math.transpose(a2)));
+    bigDelta1.add(Matrix.multiply(d2, a1.T));
+    bigDelta2.add(Matrix.multiply(d3, a2.T));
   }
-
-  let D1 = math.multiply(1/m, bigDelta1);
-  let D2 = math.multiply(1/m, bigDelta2);
+  let D1 = bigDelta1.scale(1 / m);
+  let D2 = bigDelta2.scale(1 / m);
 
   // let J = math.multiply(
   //   -(1/m), 
@@ -85,19 +90,19 @@ const costFunction = (X, y, theta1, theta2, inputs, outputs, hidden) => {
     D2
   };
 };
-let hidden = 15;
-let inputs = 2;
-let outputs = 3;
-var theta1 = math.random([hidden, inputs + 1], -1, 1);
-var theta2 = math.random([outputs, hidden + 1], -1, 1);
-
+var theta1 = Matrix.random(hidden, inputs + 1);
+var theta2 = Matrix.random(outputs, hidden + 1);
 const train = (X, y, alpha = 1) => {
   let {D1, D2} = costFunction(X, y, theta1, theta2, inputs, outputs, hidden);
-
-  theta1 = math.subtract(theta1, math.multiply(alpha, D1.toArray().slice(1)));
-  theta2 = math.subtract(theta2, math.multiply(alpha, D2.toArray()));
+  theta1 = Matrix.subtract(
+    theta1, 
+    Matrix.scale(
+      Matrix.fromArray(D1.toArray().slice(1)), alpha
+    )
+  );
+  theta2.subtract(Matrix.scale(D2, alpha));
 
   return forwardPropagate.bind(null, theta1, theta2, inputs);
-};
+};  
 
 window.train = train;
